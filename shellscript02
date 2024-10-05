@@ -1,0 +1,31 @@
+#take users details informaiton
+
+echo "#######################################"
+read -p "tell me your name: " name1
+read -p "tell me your Birth date: " DOB1
+
+echo "your age is $name1, and your age is $DOB1"
+
+root@jenkins:~# cat number.sh
+#!/bin/bash
+
+#this is sample calculator program
+
+read -p "enter number: " num1
+
+read -p "enter number: " num2
+
+add=`expr $num1 + $num2`
+
+echo "print addition of two numbers $add"
+
+
+sub=`expr $num1 - $num2`
+echo "print substraction of two numbers $sub"
+
+multiply=`expr $num1 \* $num2`
+echo "print multiplication of two numbers $multiply"
+
+divide=`expr $num1 / $num2`
+echo "print division of two numbers $divide"
+
