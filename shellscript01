@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#write a program to print CPUinfo,memory,diskf
+
+echo "Get the cpuinfo"
+var_cpu=`cat /proc/cpuinfo | grep "cpu cores"`
+var_memory=` free -h | grep "Mem:" | tr -s ' ' | cut -d ' ' -f2`
+var_df_Availspace=`df -h |grep "/dev/sda3" |tr -s ' '| cut -d ' ' -f4`
+var_df_usedspace=`df -h |grep "/dev/sda3" |tr -s ' '| cut -d ' ' -f3`
+echo "number of CPU Cores $var_cpu"
+echo "Memory Status $var_memory"
+echo "Available memory status  $var_df_Availspace"
+echo 'used memory status  $var_df_usedspace'
