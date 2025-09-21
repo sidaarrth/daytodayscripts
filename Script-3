@@ -1,0 +1,45 @@
+# SystemMonitoring_Log.ps1
+# Script to monitor CPU, RAM, Disk usage, and log to CSV every 5 minutes
+
+# Path to save CSV log
+$csvPath = "C:\SystemPerformanceLog.csv"
+
+# Check if CSV exists, if not create and add headers
+if (-not (Test-Path $csvPath)) {
+    "TimeStamp,CPU_Usage%,Total_RAM_GB,Used_RAM_GB,Free_RAM_GB,RAM_Usage%,Disk,Disk_Total_GB,Disk_Used_GB,Disk_Free_GB,Disk_Usage%" | Out-File -FilePath $csvPath
+}
+
+# Infinite loop to collect data every 5 minutes
+while ($true) {
+    $TimeStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+    # CPU Usage
+    $cpuUsage = Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average | Select-Object -ExpandProperty Average
+
+    # RAM Usage
+    $memory = Get-CimInstance Win32_OperatingSystem
+    $totalRAM = [math]::round($memory.TotalVisibleMemorySize / 1MB,2)
+    $freeRAM = [math]::round($memory.FreePhysicalMemory / 1MB,2)
+    $usedRAM = [math]::round($totalRAM - $freeRAM,2)
+    $ramUsagePercent = [math]::round(($usedRAM / $totalRAM) * 100,2)
+
+    # Disk Usage
+    $disks = Get-CimInstance Win32_LogicalDisk -Filter "DriveType=3"
+    foreach ($disk in $disks) {
+        $size = [math]::round($disk.Size / 1GB,2)
+        $free = [math]::round($disk.FreeSpace / 1GB,2)
+        $used = [math]::round($size - $free,2)
+        $percentUsed = [math]::round(($used / $size) * 100,2)
+
+        # Prepare CSV line
+        $line = "$TimeStamp,$cpuUsage,$totalRAM,$usedRAM,$freeRAM,$ramUsagePercent,$($disk.DeviceID),$size,$used,$free,$percentUsed"
+
+        # Append to CSV
+        $line | Out-File -FilePath $csvPath -Append
+    }
+
+    Write-Host "[$TimeStamp] Performance data logged to $csvPath"
+
+    # Wait 5 minutes
+    Start-Sleep -Seconds 300
+}
