@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+import os
+import datetime
+
+POOL = "tank"
+DATASET = "shared"
+timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M")
+
+snapshot_name = f"{POOL}/{DATASET}@{timestamp}"
+os.system(f"zfs snapshot {snapshot_name}")
+print(f"Snapshot created: {snapshot_name}")
