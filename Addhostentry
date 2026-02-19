@@ -1,0 +1,32 @@
+# Run PowerShell as Administrator
+
+$hostsPath = "C:\Windows\System32\drivers\etc\hosts"
+$backupPath = "C:\Windows\System32\drivers\etc\hosts.bak"
+
+# DR Server details
+$drIP = "10.10.20.50"
+$hostname = "www.mywebapp.com"
+
+# Create backup (only once)
+if (!(Test-Path $backupPath)) {
+    Copy-Item $hostsPath $backupPath -Force
+    Write-Host "Backup created at $backupPath"
+}
+
+# Entry to add
+$newEntry = "$drIP`t$hostname"
+
+# Check if entry already exists
+$hostsContent = Get-Content $hostsPath -ErrorAction Stop
+
+if ($hostsContent -match [regex]::Escape($hostname)) {
+    Write-Host "Entry for $hostname already exists. No change made."
+} else {
+    Add-Content -Path $hostsPath -Value $newEntry
+    Write-Host "DR entry added successfully:"
+    Write-Host $newEntry
+}
+
+# Flush DNS cache
+ipconfig /flushdns | Out-Null
+Write-Host "DNS cache flushed."
