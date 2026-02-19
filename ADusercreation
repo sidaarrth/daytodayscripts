@@ -1,0 +1,44 @@
+Import-Module ActiveDirectory
+
+$users = Import-Csv "C:\Scripts\users.csv"
+
+$logFile = "C:\Scripts\UserCreationLog.txt"
+
+foreach ($user in $users) {
+
+    $Username = $user.Username
+
+    try {
+        # Check if user already exists
+        if (Get-ADUser -Filter "SamAccountName -eq '$Username'") {
+            $msg = "User already exists: $Username"
+            Write-Host $msg
+            Add-Content -Path $logFile -Value $msg
+        }
+        else {
+            $Password = ConvertTo-SecureString $user.Password -AsPlainText -Force
+
+            New-ADUser `
+                -Name "$($user.FirstName) $($user.LastName)" `
+                -GivenName $user.FirstName `
+                -Surname $user.LastName `
+                -SamAccountName $Username `
+                -UserPrincipalName "$Username@company.com" `
+                -EmailAddress $user.Email `
+                -Department $user.Department `
+                -AccountPassword $Password `
+                -Path $user.OU `
+                -Enabled $true `
+                -ChangePasswordAtLogon $true
+
+            $msg = "User created successfully: $Username"
+            Write-Host $msg
+            Add-Content -Path $logFile -Value $msg
+        }
+    }
+    catch {
+        $errorMsg = "Error creating user $Username : $_"
+        Write-Host $errorMsg
+        Add-Content -Path $logFile -Value $errorMsg
+    }
+}
